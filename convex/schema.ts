@@ -94,6 +94,63 @@ const applicationTables = {
   })
   .index("by_isActive", ["isActive"])
   .index("by_order", ["order"]),
+
+  // Cart items table
+  cartItems: defineTable({
+    userId: v.id("users"),
+    skuId: v.id("skus"),
+    quantity: v.number(),
+  })
+  .index("by_user", ["userId"])
+  .index("by_user_sku", ["userId", "skuId"]),
+
+  // Addresses table for user shipping/billing addresses
+  addresses: defineTable({
+    userId: v.id("users"),
+    type: v.union(v.literal("shipping"), v.literal("billing")),
+    firstName: v.string(),
+    lastName: v.string(),
+    street: v.string(),
+    city: v.string(),
+    state: v.string(),
+    zipCode: v.string(),
+    country: v.string(),
+    phone: v.optional(v.string()),
+    isDefault: v.optional(v.boolean()),
+  })
+  .index("by_user", ["userId"])
+  .index("by_user_type", ["userId", "type"]),
+
+  // Orders table
+  orders: defineTable({
+    userId: v.id("users"),
+    orderNumber: v.string(), // Unique order number
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("shipped"),
+      v.literal("delivered"),
+      v.literal("cancelled")
+    ),
+    totalAmount: v.number(),
+    shippingAddressId: v.id("addresses"),
+    billingAddressId: v.id("addresses"),
+    items: v.array(v.object({
+      skuId: v.id("skus"),
+      productId: v.id("products"),
+      productName: v.string(),
+      skuCode: v.string(),
+      size: v.string(),
+      color: v.string(),
+      price: v.number(),
+      quantity: v.number(),
+    })),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+  .index("by_user", ["userId"])
+  .index("by_orderNumber", ["orderNumber"])
+  .index("by_status", ["status"]),
 };
 
 export default defineSchema({

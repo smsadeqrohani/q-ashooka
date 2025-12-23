@@ -1,21 +1,25 @@
 "use client";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useState } from "react";
-import { Authenticated } from "convex/react";
+import { Authenticated, Unauthenticated } from "convex/react";
+import { toast } from "sonner";
+import { Header } from "./Header";
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const loggedInUser = useQuery(api.auth.loggedInUser);
   const product = useQuery(
     api.products.getById,
     id ? { id: id as any } : "skip"
   );
+  const addToCart = useMutation(api.cart.addToCart);
   
   const [selectedSku, setSelectedSku] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   if (!id) {
     return (
@@ -98,43 +102,7 @@ export function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="text-2xl font-bold text-gray-900 hover:text-indigo-600 transition-colors">
-              ShopHub
-            </Link>
-            <nav className="flex items-center space-x-4">
-              <Authenticated>
-                <span className="text-gray-700">
-                  Welcome, {loggedInUser?.email ?? "User"}!
-                </span>
-                {loggedInUser?.isAdmin && (
-                  <Link
-                    to="/dashboard"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                )}
-                <Link
-                  to="/signout"
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  Sign Out
-                </Link>
-              </Authenticated>
-              <Link
-                to="/signin"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Sign In
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Product Detail Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -379,14 +347,75 @@ export function ProductDetail() {
               </div>
             )}
 
+            {/* Quantity Selector */}
+            {displaySku && displaySku.stockQuantity > 0 && (
+              <div className="flex items-center gap-4">
+                <label className="text-lg font-semibold text-gray-900">Quantity:</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 rounded border border-gray-300 hover:bg-gray-50"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max={displaySku.stockQuantity}
+                    value={quantity}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setQuantity(Math.max(1, Math.min(val, displaySku.stockQuantity)));
+                    }}
+                    className="w-20 text-center border border-gray-300 rounded-lg py-2"
+                  />
+                  <button
+                    onClick={() => setQuantity(Math.min(displaySku.stockQuantity, quantity + 1))}
+                    className="w-10 h-10 rounded border border-gray-300 hover:bg-gray-50"
+                  >
+                    +
+                  </button>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {displaySku.stockQuantity} available
+                </span>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex gap-4 pt-4">
-              <button
-                disabled={!displaySku || displaySku.stockQuantity === 0}
-                className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
-              >
-                Add to Cart
-              </button>
+              <Authenticated>
+                <button
+                  onClick={async () => {
+                    if (!displaySku) return;
+                    setAddingToCart(true);
+                    try {
+                      await addToCart({
+                        skuId: displaySku._id as any,
+                        quantity,
+                      });
+                      toast.success("Added to cart!");
+                      setQuantity(1);
+                    } catch (error: any) {
+                      toast.error(error.message || "Failed to add to cart");
+                    } finally {
+                      setAddingToCart(false);
+                    }
+                  }}
+                  disabled={!displaySku || displaySku.stockQuantity === 0 || addingToCart}
+                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                >
+                  {addingToCart ? "Adding..." : "Add to Cart"}
+                </button>
+              </Authenticated>
+              <Unauthenticated>
+                <Link
+                  to="/signin"
+                  className="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold text-center"
+                >
+                  Sign In to Add to Cart
+                </Link>
+              </Unauthenticated>
               <button className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-gray-400 transition-colors font-semibold">
                 Wishlist
               </button>

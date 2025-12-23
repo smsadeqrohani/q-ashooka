@@ -8,12 +8,13 @@ import { ProductManagement } from "./ProductManagement";
 import { CategoryManagement } from "./CategoryManagement";
 import { TagManagement } from "./TagManagement";
 import { HomePageManagement } from "./HomePageManagement";
+import { OrdersManagement } from "./OrdersManagement";
 
 export function Dashboard() {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<"overview" | "products" | "categories" | "tags" | "users" | "homepage">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "products" | "categories" | "tags" | "users" | "homepage" | "orders">("overview");
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -28,7 +29,7 @@ export function Dashboard() {
   useEffect(() => {
     const parts = location.pathname.split("/");
     const section = parts[2] as typeof activeTab | undefined;
-    if (section === "products" || section === "categories" || section === "tags" || section === "users" || section === "homepage") {
+    if (section === "products" || section === "categories" || section === "tags" || section === "users" || section === "homepage" || section === "orders") {
       setActiveTab(section);
     } else {
       setActiveTab("overview");
@@ -164,6 +165,19 @@ export function Dashboard() {
             >
               Home Page
             </button>
+            <button
+              onClick={() => {
+                navigate("/dashboard/orders");
+                setActiveTab("orders");
+              }}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "orders"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Orders
+            </button>
           </nav>
         </div>
 
@@ -296,6 +310,7 @@ export function Dashboard() {
         {activeTab === "tags" && <TagManagement />}
         {activeTab === "users" && <UserManagement />}
         {activeTab === "homepage" && <HomePageManagement />}
+        {activeTab === "orders" && <OrdersManagement />}
       </main>
     </div>
   );

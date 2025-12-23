@@ -18,12 +18,10 @@ export const loggedInUser = query({
       return null;
     }
 
-    // Get additional user data including isAdmin
-    const userData = await ctx.db.query("users").withIndex("by_id", (q) => q.eq("_id", userId)).first();
-
+    // User data already includes isAdmin from the users table
     return {
       ...user,
-      isAdmin: userData?.isAdmin ?? false,
+      isAdmin: user.isAdmin ?? false,
     };
   },
 });
