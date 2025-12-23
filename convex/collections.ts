@@ -116,3 +116,20 @@ export const remove = mutation({
   },
 });
 
+// Reorder collections
+export const reorder = mutation({
+  args: {
+    collectionOrders: v.array(v.object({
+      id: v.id("collections"),
+      order: v.number(),
+    })),
+  },
+  handler: async (ctx, args) => {
+    await Promise.all(
+      args.collectionOrders.map(({ id, order }) =>
+        ctx.db.patch(id, { order })
+      )
+    );
+  },
+});
+

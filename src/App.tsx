@@ -4,6 +4,7 @@ import { Home } from "./Home";
 import { SignInPage } from "./SignInPage";
 import { Dashboard } from "./Dashboard";
 import { AdminSetup } from "./AdminSetup";
+import { ProductDetail } from "./ProductDetail";
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="/admin-setup" element={<AdminSetup />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
       <Toaster />
     </div>

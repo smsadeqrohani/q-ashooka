@@ -105,19 +105,33 @@ export const getById = query({
       .withIndex("by_product", (q) => q.eq("productId", args.id))
       .collect();
 
-    const defaultSku = skus.find((s) => s.isDefault) ?? skus[0] ?? null;
-    const defaultImageUrl =
-      defaultSku && defaultSku.imageId
-        ? await ctx.storage.getUrl(defaultSku.imageId)
-        : null;
+    // Get image URLs for all SKUs
+    const skusWithImages = await Promise.all(
+      skus.map(async (sku) => {
+        const imageUrl = sku.imageId
+          ? await ctx.storage.getUrl(sku.imageId)
+          : null;
+        return {
+          ...sku,
+          imageUrl,
+        };
+      })
+    );
+
+    const defaultSku = skusWithImages.find((s) => s.isDefault) ?? skusWithImages[0] ?? null;
+    
+    // Collect all unique image URLs from all SKUs
+    const allImageUrls = skusWithImages
+      .map(sku => sku.imageUrl)
+      .filter((url): url is string => url !== null);
 
     return {
       ...product,
       category,
       tags: tags.filter(Boolean),
-      skus,
+      skus: skusWithImages,
       defaultSku,
-      imageUrls: defaultImageUrl ? [defaultImageUrl] : [],
+      imageUrls: allImageUrls.length > 0 ? allImageUrls : (defaultSku?.imageUrl ? [defaultSku.imageUrl] : []),
       price: defaultSku?.price ?? 0,
     };
   },

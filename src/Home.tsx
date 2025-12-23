@@ -9,8 +9,35 @@ import { CollectionSection } from "./CollectionSection";
 
 export function Home() {
   const loggedInUser = useQuery(api.auth.loggedInUser);
+  const sliders = useQuery(api.sliders.getActive);
   const homepageSections = useQuery(api.homepageSections.getActive);
   const featuredCollections = useQuery(api.collections.getFeatured);
+
+  // Get the first slider's order (sliders are shown together in one carousel)
+  const sliderOrder = sliders && sliders.length > 0 ? Math.min(...sliders.map(s => s.order)) : null;
+
+  // Combine all active items and sort by order for unified display
+  const allHomepageItems = [
+    // Sliders appear as one item (the carousel shows all sliders)
+    ...(sliders && sliders.length > 0 ? [{
+      type: "slider" as const,
+      id: "slider-carousel",
+      order: sliderOrder!,
+      data: null,
+    }] : []),
+    ...(homepageSections?.map(s => ({
+      type: s.type as "productListing" | "categoryListing",
+      id: s._id,
+      order: s.order,
+      data: s,
+    })) || []),
+    ...(featuredCollections?.map(c => ({
+      type: "collection" as const,
+      id: c._id,
+      order: c.order,
+      data: c,
+    })) || []),
+  ].sort((a, b) => a.order - b.order);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -50,63 +77,51 @@ export function Home() {
         </div>
       </header>
 
-      {/* Dynamic Homepage Content */}
+      {/* Dynamic Homepage Content - Rendered in unified order */}
       <main className="flex-1">
-        {/* Slider Section */}
-        <Slider />
-
-        {/* Homepage Sections - Dynamically rendered based on order */}
-        {homepageSections?.map((section) => {
-          if (section.type === "productListing") {
+        {allHomepageItems.map((item) => {
+          if (item.type === "slider") {
+            return <Slider key={item.id} />;
+          } else if (item.type === "productListing") {
             return (
               <ProductListingSection
-                key={section._id}
+                key={item.id}
                 section={{
-                  _id: section._id,
-                  title: section.title,
-                  productIds: section.productIds?.map(id => id as string),
-                  limit: section.limit,
+                  _id: item.id,
+                  title: item.data.title,
+                  productIds: item.data.productIds?.map(id => id as string),
+                  limit: item.data.limit,
                 }}
               />
             );
-          } else if (section.type === "categoryListing") {
+          } else if (item.type === "categoryListing") {
             return (
               <CategoryListingSection
-                key={section._id}
+                key={item.id}
                 section={{
-                  _id: section._id,
-                  title: section.title,
-                  categoryIds: section.categoryIds?.map(id => id as string),
-                  limit: section.limit,
+                  _id: item.id,
+                  title: item.data.title,
+                  categoryIds: item.data.categoryIds?.map(id => id as string),
+                  limit: item.data.limit,
+                }}
+              />
+            );
+          } else if (item.type === "collection") {
+            return (
+              <CollectionSection
+                key={item.id}
+                collection={{
+                  _id: item.id,
+                  name: item.data.name,
+                  description: item.data.description,
+                  imageUrl: item.data.imageUrl,
+                  productIds: item.data.productIds?.map(id => id as string),
                 }}
               />
             );
           }
           return null;
         })}
-
-        {/* Featured Collections */}
-        {featuredCollections && featuredCollections.length > 0 && (
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-              Featured Collections
-            </h2>
-            <div className="space-y-16">
-              {featuredCollections.map((collection) => (
-                <CollectionSection
-                  key={collection._id}
-                  collection={{
-                    _id: collection._id,
-                    name: collection.name,
-                    description: collection.description,
-                    imageUrl: collection.imageUrl,
-                    productIds: collection.productIds?.map(id => id as string),
-                  }}
-                />
-              ))}
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );
