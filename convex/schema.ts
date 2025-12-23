@@ -53,6 +53,47 @@ const applicationTables = {
   .index("by_product", ["productId"])
   .index("by_sku", ["sku"])
   .index("by_size_color", ["productId", "size", "color"]),
+
+  // Sliders table for home page carousel
+  sliders: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    imageId: v.id("_storage"),
+    linkUrl: v.optional(v.string()), // Optional link when slider is clicked
+    linkText: v.optional(v.string()), // Optional button text
+    order: v.number(), // Order for display
+    isActive: v.boolean(),
+  })
+  .index("by_isActive", ["isActive"])
+  .index("by_order", ["order"]),
+
+  // Collections table for grouping products
+  collections: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")),
+    productIds: v.array(v.id("products")), // Products in this collection
+    order: v.number(), // Order for display on homepage
+    isActive: v.boolean(),
+    isFeatured: v.boolean(), // Whether to show on homepage
+  })
+  .index("by_isActive", ["isActive"])
+  .index("by_isFeatured", ["isFeatured"])
+  .index("by_order", ["order"]),
+
+  // Homepage sections configuration
+  homepageSections: defineTable({
+    type: v.union(v.literal("productListing"), v.literal("categoryListing"), v.literal("collection")),
+    title: v.string(),
+    productIds: v.optional(v.array(v.id("products"))), // For product listings
+    categoryIds: v.optional(v.array(v.id("categories"))), // For category listings
+    collectionId: v.optional(v.id("collections")), // For collection display
+    order: v.number(),
+    isActive: v.boolean(),
+    limit: v.optional(v.number()), // How many items to show
+  })
+  .index("by_isActive", ["isActive"])
+  .index("by_order", ["order"]),
 };
 
 export default defineSchema({

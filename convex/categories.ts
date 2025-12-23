@@ -5,7 +5,22 @@ import { mutation, query } from "./_generated/server";
 export const getAll = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("categories").collect();
+    const categories = await ctx.db.query("categories").collect();
+    
+    // Get image URLs for all categories
+    const categoriesWithImages = await Promise.all(
+      categories.map(async (category) => {
+        const imageUrl = category.imageId
+          ? await ctx.storage.getUrl(category.imageId)
+          : null;
+        return {
+          ...category,
+          imageUrl,
+        };
+      })
+    );
+    
+    return categoriesWithImages;
   },
 });
 

@@ -7,12 +7,13 @@ import { UserManagement } from "./UserManagement";
 import { ProductManagement } from "./ProductManagement";
 import { CategoryManagement } from "./CategoryManagement";
 import { TagManagement } from "./TagManagement";
+import { HomePageManagement } from "./HomePageManagement";
 
 export function Dashboard() {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<"overview" | "products" | "categories" | "tags" | "users">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "products" | "categories" | "tags" | "users" | "homepage">("overview");
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
@@ -27,7 +28,7 @@ export function Dashboard() {
   useEffect(() => {
     const parts = location.pathname.split("/");
     const section = parts[2] as typeof activeTab | undefined;
-    if (section === "products" || section === "categories" || section === "tags" || section === "users") {
+    if (section === "products" || section === "categories" || section === "tags" || section === "users" || section === "homepage") {
       setActiveTab(section);
     } else {
       setActiveTab("overview");
@@ -149,6 +150,19 @@ export function Dashboard() {
               }`}
             >
               User Management
+            </button>
+            <button
+              onClick={() => {
+                navigate("/dashboard/homepage");
+                setActiveTab("homepage");
+              }}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "homepage"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Home Page
             </button>
           </nav>
         </div>
@@ -281,6 +295,7 @@ export function Dashboard() {
         {activeTab === "categories" && <CategoryManagement />}
         {activeTab === "tags" && <TagManagement />}
         {activeTab === "users" && <UserManagement />}
+        {activeTab === "homepage" && <HomePageManagement />}
       </main>
     </div>
   );

@@ -10,11 +10,14 @@
 
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
+import type * as collections from "../collections.js";
 import type * as files from "../files.js";
+import type * as homepageSections from "../homepageSections.js";
 import type * as http from "../http.js";
 import type * as products from "../products.js";
 import type * as router from "../router.js";
 import type * as skus from "../skus.js";
+import type * as sliders from "../sliders.js";
 import type * as tags from "../tags.js";
 import type * as users from "../users.js";
 
@@ -27,11 +30,14 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   categories: typeof categories;
+  collections: typeof collections;
   files: typeof files;
+  homepageSections: typeof homepageSections;
   http: typeof http;
   products: typeof products;
   router: typeof router;
   skus: typeof skus;
+  sliders: typeof sliders;
   tags: typeof tags;
   users: typeof users;
 }>;
