@@ -1,12 +1,20 @@
 "use client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Authenticated, Unauthenticated } from "convex/react";
 import { useQuery } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../convex/_generated/api";
 
 export function Header() {
   const loggedInUser = useQuery(api.auth.loggedInUser);
   const cartCount = useQuery(api.cart.getCartCount);
+  const { signOut } = useAuthActions();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm shadow-sm">
@@ -46,12 +54,12 @@ export function Header() {
                   Dashboard
                 </Link>
               )}
-              <Link
-                to="/signout"
+              <button
+                onClick={handleSignOut}
                 className="px-4 py-2 text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Sign Out
-              </Link>
+              </button>
             </Authenticated>
             <Unauthenticated>
               <Link
