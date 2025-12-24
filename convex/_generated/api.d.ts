@@ -21,6 +21,7 @@ import type * as products from "../products.js";
 import type * as router from "../router.js";
 import type * as skus from "../skus.js";
 import type * as sliders from "../sliders.js";
+import type * as stats from "../stats.js";
 import type * as tags from "../tags.js";
 import type * as users from "../users.js";
 
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   router: typeof router;
   skus: typeof skus;
   sliders: typeof sliders;
+  stats: typeof stats;
   tags: typeof tags;
   users: typeof users;
 }>;

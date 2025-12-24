@@ -1,6 +1,15 @@
-# project
+# Ashooka - Premium Fashion E-Commerce Platform
   
-This is a project built with [Chef](https://chef.convex.dev) using [Convex](https://convex.dev) as its backend.
+Ashooka is a modern, full-featured fashion and clothing e-commerce platform built with [Chef](https://chef.convex.dev) using [Convex](https://convex.dev) as its backend. 
+
+## About
+
+Ashooka is your one-stop destination for premium fashion and clothing. We offer a seamless shopping experience with:
+- **Curated Collections**: Discover the latest fashion trends and style essentials
+- **Quality Products**: Premium clothing, accessories, and fashion items
+- **Easy Shopping**: Intuitive interface with advanced product filtering and search
+- **Secure Checkout**: Safe and reliable payment processing
+- **Fast Delivery**: Quick shipping to get your fashion finds to you fast
  You can find docs about Chef with useful information like how to deploy to production [here](https://docs.convex.dev/chef).
   
 This project is connected to the Convex deployment named [`dashing-toucan-455`](https://dashboard.convex.dev/d/dashing-toucan-455).
